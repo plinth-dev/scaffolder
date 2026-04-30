@@ -1,0 +1,18 @@
+# Node / yarn (Backstage convention)
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Test
+coverage/
+
+# Local env
+.env
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+*.swo
