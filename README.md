@@ -1,17 +1,35 @@
 # Plinth — Backstage scaffolder
 
-> **Status: not yet released — Phase E in progress.**
-> Neither `template.yaml` nor `@plinth-dev/scaffolder-actions` is published yet. The example below describes the **target** integration shape; copy it as a reference, not a recipe. Track progress on the [roadmap](https://github.com/plinth-dev/.github/blob/main/ROADMAP.md).
+A [Backstage](https://backstage.io) software template plus a custom action that scaffolds a new Plinth module pair (web + API) from inside the developer portal. Mirrors the [`plinth` CLI](https://github.com/plinth-dev/cli) — same inputs, same output, regardless of which surface the user enters from.
 
-A [Backstage](https://backstage.io) software template plus the supporting custom actions that scaffold a new Plinth module from inside the developer portal.
+## Repo layout
 
-## What it will provide (target — Phase E)
+| Path                                  | What it is                                               |
+|---------------------------------------|----------------------------------------------------------|
+| `template.yaml`                       | Backstage software template — registered in your catalog |
+| `packages/scaffolder-actions/`        | `@plinth-dev/scaffolder-actions` npm package             |
 
-- `template.yaml` — the Backstage software template with a guided form (module name, web/API toggles, owner team, data class).
-- A custom action — `plinth:open-platform-mrs` — that opens MRs against the GitOps repo (Argo Application) and the policies repo (default Cerbos policy).
-- The `register-component` step that adds the new module to the Backstage catalog.
+## Add it to your Backstage
 
-## How to add it to your Backstage (target)
+### 1. Install the actions package
+
+```bash
+yarn add --cwd packages/backend @plinth-dev/scaffolder-actions
+```
+
+`@backstage/plugin-scaffolder-node` is a peer dependency — every Backstage backend already has it.
+
+### 2. Register the `plinth:scaffold` action
+
+```ts
+// packages/backend/src/index.ts
+import { createPlinthScaffoldAction } from "@plinth-dev/scaffolder-actions";
+
+// Inside whichever scaffolder module-extension form your backend uses:
+scaffolder.addActions(createPlinthScaffoldAction());
+```
+
+### 3. Register the template in your catalog
 
 ```yaml
 # app-config.yaml
@@ -23,30 +41,44 @@ catalog:
         - allow: [Template]
 ```
 
-Then drop the custom action into your Backstage backend:
+## What the template does
+
+The template asks for:
+- **Name** — lowercase kebab-case
+- **Go module path** — defaults to `github.com/example/<name>-api`
+- **Tiers** — web, API, or both
+- **Starter tag** — defaults to `v0.1.0`
+
+Then `plinth:scaffold` runs:
+1. Fetches `https://codeload.github.com/plinth-dev/starter-{web,api}/tar.gz/refs/tags/<ref>`.
+2. Strips the `<repo>-<ref>/` prefix and writes into the scaffolder workspace.
+3. Rewrites identifier tokens:
+   - `github.com/plinth-dev/starter-api` → your `modulePath`
+   - bare `starter-api` → `<name>-api`
+   - bare `starter-web` → `<name>-web`
+4. Skips `node_modules/`, `.git/`, lockfiles, and binary files.
+
+Output directories live at `<workspace>/<name>-api/` and `<workspace>/<name>-web/`.
+
+## Output parity with the CLI
+
+The Backstage template and `plinth new` are intended to produce **byte-identical output** for the same input — the rewrite rules and fetch URL are the same. A golden-tree CI check that diffs both surfaces is on the roadmap.
+
+## Develop
 
 ```bash
-yarn add @plinth-dev/scaffolder-actions
+pnpm install
+pnpm test
+pnpm typecheck
+pnpm build
 ```
 
-```ts
-// packages/backend/src/plugins/scaffolder.ts
-import { plinthOpenPlatformMrsAction } from "@plinth-dev/scaffolder-actions";
-
-export const actions = [
-  ...createBuiltinActions({ /* ... */ }),
-  plinthOpenPlatformMrsAction({ /* ... */ }),
-];
-```
-
-## Output parity with the CLI (target)
-
-The Backstage template and the [`plinth` CLI](https://github.com/plinth-dev/cli) will produce **identical output** for the same inputs. CI will verify this on every change against a checked-in golden tree.
+The action package's pure functions (`scaffold`, `applyReplacements`, `fetchAndExtract`) are also exported for non-Backstage callers.
 
 ## Related
 
 - [`cli`](https://github.com/plinth-dev/cli) — the matching CLI flow.
-- [`starter-web`](https://github.com/plinth-dev/starter-web) / [`starter-api`](https://github.com/plinth-dev/starter-api) — what the template clones.
+- [`starter-web`](https://github.com/plinth-dev/starter-web) / [`starter-api`](https://github.com/plinth-dev/starter-api) — what the template fetches.
 - [`platform`](https://github.com/plinth-dev/platform) — the substrate this scaffolder targets.
 
 ## License

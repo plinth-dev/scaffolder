@@ -1,0 +1,79 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: plinth-module
+  title: New Plinth module
+  description: >-
+    Scaffold a new Plinth module from the
+    plinth-dev/starter-{web,api} starters. Mirrors the CLI flow
+    exactly — same input always produces the same output.
+  tags:
+    - plinth
+    - go
+    - typescript
+    - backend
+    - frontend
+spec:
+  owner: plinth-dev
+  type: service
+
+  parameters:
+    - title: Module identity
+      required:
+        - name
+      properties:
+        name:
+          title: Name
+          type: string
+          description: >-
+            Lowercase kebab-case (e.g. "billing", "user-profile"). The API tier
+            lands in <name>-api, the web tier in <name>-web.
+          pattern: "^[a-z][a-z0-9]*(-[a-z0-9]+)*$"
+        modulePath:
+          title: Go module path
+          type: string
+          description: >-
+            Defaults to github.com/example/<name>-api — override to match the
+            org/repo where you'll push the API tier.
+
+    - title: Tiers
+      properties:
+        api:
+          title: Scaffold API tier
+          type: boolean
+          default: true
+        web:
+          title: Scaffold web tier
+          type: boolean
+          default: true
+
+    - title: Source pin
+      properties:
+        ref:
+          title: Starter tag
+          type: string
+          default: v0.1.0
+          description: Starter ref to fetch (e.g. v0.1.0).
+
+  steps:
+    - id: plinth-scaffold
+      name: Fetch + rewrite starters
+      action: plinth:scaffold
+      input:
+        name: ${{ parameters.name }}
+        api: ${{ parameters.api }}
+        web: ${{ parameters.web }}
+        modulePath: ${{ parameters.modulePath }}
+        ref: ${{ parameters.ref }}
+
+  output:
+    text:
+      - title: API scaffold
+        content: |
+          API tier written to `${{ steps['plinth-scaffold'].output.apiPath }}`
+      - title: Web scaffold
+        content: |
+          Web tier written to `${{ steps['plinth-scaffold'].output.webPath }}`
+      - title: Files rewritten
+        content: |
+          ${{ steps['plinth-scaffold'].output.rewrittenFiles }} files modified by the rewrite step.
