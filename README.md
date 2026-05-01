@@ -1,16 +1,17 @@
 # Plinth — Backstage scaffolder
 
+> **Status: not yet released — Phase E in progress.**
+> Neither `template.yaml` nor `@plinth-dev/scaffolder-actions` is published yet. The example below describes the **target** integration shape; copy it as a reference, not a recipe. Track progress on the [roadmap](https://github.com/plinth-dev/.github/blob/main/ROADMAP.md).
+
 A [Backstage](https://backstage.io) software template plus the supporting custom actions that scaffold a new Plinth module from inside the developer portal.
 
-> **Status: v0.1.0 — Phase E in progress.**
-
-## What it provides
+## What it will provide (target — Phase E)
 
 - `template.yaml` — the Backstage software template with a guided form (module name, web/API toggles, owner team, data class).
 - A custom action — `plinth:open-platform-mrs` — that opens MRs against the GitOps repo (Argo Application) and the policies repo (default Cerbos policy).
 - The `register-component` step that adds the new module to the Backstage catalog.
 
-## How to add it to your Backstage
+## How to add it to your Backstage (target)
 
 ```yaml
 # app-config.yaml
@@ -38,9 +39,9 @@ export const actions = [
 ];
 ```
 
-## Output parity with the CLI
+## Output parity with the CLI (target)
 
-The Backstage template and the [`plinth` CLI](https://github.com/plinth-dev/cli) produce **identical output** for the same inputs. CI verifies this on every change against a checked-in golden tree.
+The Backstage template and the [`plinth` CLI](https://github.com/plinth-dev/cli) will produce **identical output** for the same inputs. CI will verify this on every change against a checked-in golden tree.
 
 ## Related
 
