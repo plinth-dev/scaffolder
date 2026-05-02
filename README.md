@@ -2,6 +2,8 @@
 
 A [Backstage](https://backstage.io) software template plus a custom action that scaffolds a new Plinth module pair (web + API) from inside the developer portal. Mirrors the [`plinth` CLI](https://github.com/plinth-dev/cli) — same inputs, same output, regardless of which surface the user enters from.
 
+Project docs and the broader Plinth platform: [plinth.run](https://plinth.run).
+
 ## Repo layout
 
 | Path                                  | What it is                                               |
